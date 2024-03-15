@@ -1,5 +1,6 @@
 # Att göra
 
+### AdminApi
 - Register Admin: POST http://localhost:8080/api/v1/auth/adminRegister
 - Authenticate (Login again and update token): POST http://localhost:8080/api/v1/auth/authenticate
 - Update User by admin: UPDATE http://localhost:8080/api/v1/users/update/{userEmail}

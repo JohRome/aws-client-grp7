@@ -37,3 +37,8 @@ Y
 )src/main/java/com/jromeo/Application.java,4\6\469021ce1f7ef3baf4f899eea4f0430d06e44d83
 \
 ,src/main/java/com/jromeo/dto/StudentDTO.java,8\f\8fa0ec32bdf97a205b8dfb4c1e0493c044b96426
+9
+	README.md,8\e\8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d
+:
+
+.gitignore,a\5\a5cc2925ca8258af241be7e5b0381edf30266302

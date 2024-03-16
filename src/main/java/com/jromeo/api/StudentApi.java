@@ -58,7 +58,7 @@ public class StudentApi {
 
     }
 
-    public void getAllStudents() throws URISyntaxException, IOException, InterruptedException {
+    public List<StudentDto> getAllStudents() throws URISyntaxException, IOException, InterruptedException {
         String studentUrl = "http://localhost:8080/student/getStudents";
 
         HttpClient client = HttpClient.newHttpClient();
@@ -78,6 +78,7 @@ public class StudentApi {
             System.out.println("Students: ");
             for (StudentDto student : students) {
                 System.out.println(student.toString());
+                return students;
             }
         } else {
             System.out.println("Error fetching students. Status: " + statusCode);
@@ -143,7 +144,7 @@ public class StudentApi {
     }
 
     public void deleteStudent(long id) throws URISyntaxException, IOException, InterruptedException {
-        List<StudentDto> allStudents = getAllStudents2();
+        List<StudentDto> allStudents = getAllStudents();
 
         boolean studentExists = allStudents.stream().anyMatch(student -> student.getId() == id);
 

@@ -59,7 +59,7 @@ public class CourseApi {
 
     }
 
-    public void getAllCourses() throws URISyntaxException, IOException, InterruptedException {
+    public List<CourseDto> getAllCourses() throws URISyntaxException, IOException, InterruptedException {
         String coursesUri = "http://localhost:8080/course/getCourses";
 
         HttpClient client = HttpClient.newHttpClient();
@@ -79,6 +79,7 @@ public class CourseApi {
             System.out.println("Courses: ");
             for (CourseDto course : courses) {
                 System.out.println(course.toString());
+                return courses;
             } //else {
                 System.out.println("Error fetching courses. Status " + response.statusCode());
             //}
@@ -89,7 +90,36 @@ public class CourseApi {
 
     }
 
-    public void deleteCourse() {
+    public void deleteCourse(long id) throws URISyntaxException, IOException, InterruptedException {
+        List<CourseDto> allCourses = getAllCourses();
 
+        boolean courseExists = allCourses.stream().anyMatch(course -> course.getId() == id);
+
+        if(!courseExists) {
+            System.out.println("Course does not exist");
+            System.out.flush();
+            return;
+        }
+
+        String deleteCourseUri = "http://localhost:8080/course/delete/" + id;
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest deleteCourseRequest = HttpRequest.newBuilder()
+                .uri(new URI(deleteCourseUri))
+                .header("Content-type", "application/json")
+                .DELETE()
+                .build();
+
+        try {
+            HttpResponse<String> response = client.send(deleteCourseRequest, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                System.out.println("Course deleted");
+            } else {
+                System.out.println("Error deleting course");
+            }
+        } catch (Exception e) {
+            System.out.println("Error occurred: " + e.getMessage());
+        }
     }
 }

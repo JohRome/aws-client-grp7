@@ -54,8 +54,27 @@ public class StudentApi {
         }
     }
 
-    public void getOneStudent(StudentDto studentDTO) {
+    public void getOneStudent(long id) throws IOException, InterruptedException, URISyntaxException {
+        String getOneStudentUrl = "http://localhost:8080/student/getStudent/" + id;
 
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest getRequest = HttpRequest.newBuilder()
+                .uri(new URI(getOneStudentUrl))
+                .header("Content-Type", "application/json")
+                .build();
+
+        HttpResponse<String> response = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
+        int statusCode = response.statusCode();
+
+        if(statusCode == 200) {
+            Gson gson = new Gson();
+            Type studentType = new TypeToken<StudentDto>() {
+            }.getType();
+            StudentDto student = gson.fromJson(response.body(), studentType);
+            System.out.println(student.toString());
+        } else {
+            System.out.println("Error fechting student. Status: " + statusCode);
+        }
     }
 
     public List<StudentDto> getAllStudents() throws URISyntaxException, IOException, InterruptedException {

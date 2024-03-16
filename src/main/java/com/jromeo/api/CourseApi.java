@@ -55,8 +55,27 @@ public class CourseApi {
         }
     }
 
-    public void getOneCourse() {
+    public void getOneCourse(long id) throws URISyntaxException, IOException, InterruptedException {
+        String getOneCourseUrl = "http://localhost:8080/course/getCourse/" + id;
 
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest getRequest = HttpRequest.newBuilder()
+                .uri(new URI(getOneCourseUrl))
+                .header("Content-Type", "application/json")
+                .build();
+
+        HttpResponse<String> response = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
+        int statusCode = response.statusCode();
+
+        if (statusCode == 200) {
+            Gson gson = new Gson();
+            Type courseType = new TypeToken<CourseDto>() {
+            }.getType();
+            CourseDto course = gson.fromJson(response.body(), courseType);
+            System.out.println(course.toString());
+        } else {
+            System.out.println("Error fetching course");
+        }
     }
 
     public List<CourseDto> getAllCourses() throws URISyntaxException, IOException, InterruptedException {

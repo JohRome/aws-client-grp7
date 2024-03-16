@@ -83,6 +83,7 @@ public class StudentApi {
         } else {
             System.out.println("Error fetching students. Status: " + statusCode);
         }
+        return null;
     }
 
     public List<StudentDto> getAllStudents2() throws URISyntaxException, IOException, InterruptedException {

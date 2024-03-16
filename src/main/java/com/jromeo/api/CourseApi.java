@@ -84,10 +84,40 @@ public class CourseApi {
                 System.out.println("Error fetching courses. Status " + response.statusCode());
             //}
         }
+        return null;
     }
 
-    public void updateCourse() {
+    public void updateCourse(long id) throws IOException, InterruptedException, URISyntaxException {
+        String title = scanner.stringPut("Enter updated course title: ");
+        String abbreviation = scanner.stringPut("Enter updated course abbreviation: ");
+        int modules = scanner.intPut("Enter updated amount of modules: ");
+        double fee = scanner.doublePut("Enter updated fee: ");
 
+        var updatedCourse = new CourseDto();
+        updatedCourse.setTitle(title);
+        updatedCourse.setAbbreviation(abbreviation);
+        updatedCourse.setModules(modules);
+        updatedCourse.setFee(fee);
+
+        Gson gson = new Gson();
+        String jsonUpdatedCourse = gson.toJson(updatedCourse);
+
+        String updatedCourseUri = "http://localhost:8080/course/update/" + id;
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest updateCourseRequest = HttpRequest.newBuilder()
+                .uri(new URI(updatedCourseUri))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonUpdatedCourse))
+                .build();
+
+        HttpResponse<String> response = client.send(updateCourseRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            System.out.println("Course updated!");
+        } else {
+            System.out.println("Error updating course");
+        }
     }
 
     public void deleteCourse(long id) throws URISyntaxException, IOException, InterruptedException {

@@ -19,14 +19,14 @@ public class CourseApi {
 
     InputScanner scanner = new InputScanner();
 
-    public void addCourse(String courseName, String abbreviation, int modules, double fee) throws IOException, InterruptedException, URISyntaxException {
+    public void addCourse(CourseDto courseDto) throws IOException, InterruptedException, URISyntaxException {
         String addCourseUri = "http://localhost:8080/course/save";
 
         var course = new CourseDto();
-        course.setTitle(courseName);
-        course.setAbbreviation(abbreviation);
-        course.setModules(modules);
-        course.setFee(fee);
+        course.setTitle(courseDto.getTitle());
+        course.setAbbreviation(courseDto.getAbbreviation());
+        course.setModules(courseDto.getModules());
+        course.setFee(courseDto.getFee());
 
         Gson gson = new Gson();
         String jsonCourse = gson.toJson(course);
@@ -55,7 +55,8 @@ public class CourseApi {
         }
     }
 
-    public void getOneCourse(long id) throws URISyntaxException, IOException, InterruptedException {
+    public void getOneCourse(CourseDto courseDto) throws URISyntaxException, IOException, InterruptedException {
+        long id = courseDto.getId();
         String getOneCourseUrl = "http://localhost:8080/course/getCourse/" + id;
 
         HttpClient client = HttpClient.newHttpClient();
@@ -106,7 +107,8 @@ public class CourseApi {
         return null;
     }
 
-    public void updateCourse(long id) throws IOException, InterruptedException, URISyntaxException {
+    public void updateCourse(CourseDto courseDto) throws IOException, InterruptedException, URISyntaxException {
+        long id = courseDto.getId();
         String title = scanner.stringPut("Enter updated course title: ");
         String abbreviation = scanner.stringPut("Enter updated course abbreviation: ");
         int modules = scanner.intPut("Enter updated amount of modules: ");
@@ -139,7 +141,8 @@ public class CourseApi {
         }
     }
 
-    public void deleteCourse(long id) throws URISyntaxException, IOException, InterruptedException {
+    public void deleteCourse(CourseDto courseDto) throws URISyntaxException, IOException, InterruptedException {
+        long id = courseDto.getId();
         List<CourseDto> allCourses = getAllCourses();
 
         boolean courseExists = allCourses.stream().anyMatch(course -> course.getId() == id);

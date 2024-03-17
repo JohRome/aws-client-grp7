@@ -20,13 +20,13 @@ public class StudentApi {
 
     InputScanner scanner = new InputScanner();
 
-    public void createStudent(String studentName, int age, String dept) throws IOException, InterruptedException {
+    public void createStudent(StudentDto studentDto) throws IOException, InterruptedException {
         String newStudentUri = "http://localhost:8080/student/save";
 
         var student = new StudentDto();
-        student.setName(studentName);
-        student.setAge(age);
-        student.setDept(dept);
+        student.setName(studentDto.getName());
+        student.setAge(studentDto.getAge());
+        student.setDept(studentDto.getDept());
 
         Gson gson = new Gson();
         String jsonStudent = gson.toJson(student);
@@ -54,7 +54,8 @@ public class StudentApi {
         }
     }
 
-    public void getOneStudent(long id) throws IOException, InterruptedException, URISyntaxException {
+    public void getOneStudent(StudentDto studentDto) throws IOException, InterruptedException, URISyntaxException {
+        long id = studentDto.getId();
         String getOneStudentUrl = "http://localhost:8080/student/getStudent/" + id;
 
         HttpClient client = HttpClient.newHttpClient();
@@ -130,7 +131,9 @@ public class StudentApi {
         }
     }
 
-    public void updateStudent (long id) throws IOException, InterruptedException, URISyntaxException {
+    public void updateStudent (StudentDto studentDto) throws IOException, InterruptedException, URISyntaxException {
+        long id = studentDto.getId();
+
         String name = scanner.stringPut("Enter updated student name: ");
         int age = scanner.intPut("Inter updated student age: ");
         String dept = scanner.stringPut("Enter updated dept: ");
@@ -163,7 +166,9 @@ public class StudentApi {
         }
     }
 
-    public void deleteStudent(long id) throws URISyntaxException, IOException, InterruptedException {
+    public void deleteStudent(StudentDto studentDto) throws URISyntaxException, IOException, InterruptedException {
+        long id = studentDto.getId();
+
         List<StudentDto> allStudents = getAllStudents();
 
         boolean studentExists = allStudents.stream().anyMatch(student -> student.getId() == id);

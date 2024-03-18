@@ -2,6 +2,7 @@ package com.jromeo.api;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.jromeo.dto.CourseDto;
 import com.jromeo.dto.StudentDto;
 import com.jromeo.utils.InputScanner;
 
@@ -15,18 +16,19 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class StudentApi {
 
     InputScanner scanner = new InputScanner();
 
-    public void createStudent(String studentName, int age, String dept) throws IOException, InterruptedException {
+    public void createStudent(StudentDto studentDto) throws IOException, InterruptedException {
         String newStudentUri = "http://localhost:8080/student/save";
 
         var student = new StudentDto();
-        student.setName(studentName);
-        student.setAge(age);
-        student.setDept(dept);
+        student.setName(studentDto.getName());
+        student.setAge(studentDto.getAge());
+        student.setDept(studentDto.getDept());
 
         Gson gson = new Gson();
         String jsonStudent = gson.toJson(student);
@@ -54,11 +56,31 @@ public class StudentApi {
         }
     }
 
-    public void getOneStudent(StudentDto studentDTO) {
+    public void getOneStudent(StudentDto studentDto) throws IOException, InterruptedException, URISyntaxException {
+        long id = studentDto.getId();
+        String getOneStudentUrl = "http://localhost:8080/student/getStudent/" + id;
 
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest getRequest = HttpRequest.newBuilder()
+                .uri(new URI(getOneStudentUrl))
+                .header("Content-Type", "application/json")
+                .build();
+
+        HttpResponse<String> response = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
+        int statusCode = response.statusCode();
+
+        if(statusCode == 200) {
+            Gson gson = new Gson();
+            Type studentType = new TypeToken<StudentDto>() {
+            }.getType();
+            StudentDto student = gson.fromJson(response.body(), studentType);
+            System.out.println(student.toString());
+        } else {
+            System.out.println("Error fechting student. Status: " + statusCode);
+        }
     }
 
-    public void getAllStudents() throws URISyntaxException, IOException, InterruptedException {
+    public List<StudentDto> getAllStudents() throws URISyntaxException, IOException, InterruptedException {
         String studentUrl = "http://localhost:8080/student/getStudents";
 
         HttpClient client = HttpClient.newHttpClient();
@@ -78,10 +100,12 @@ public class StudentApi {
             System.out.println("Students: ");
             for (StudentDto student : students) {
                 System.out.println(student.toString());
+                return students;
             }
         } else {
             System.out.println("Error fetching students. Status: " + statusCode);
         }
+        return null;
     }
 
     public List<StudentDto> getAllStudents2() throws URISyntaxException, IOException, InterruptedException {
@@ -109,7 +133,10 @@ public class StudentApi {
         }
     }
 
-    public void updateStudent (long id) throws IOException, InterruptedException, URISyntaxException {
+    public void updateStudent (StudentDto studentDto) throws IOException, InterruptedException, URISyntaxException {
+        long id = studentDto.getId();
+        String updatedStudentUri = "http://localhost:8080/student/update/" + id;
+
         String name = scanner.stringPut("Enter updated student name: ");
         int age = scanner.intPut("Inter updated student age: ");
         String dept = scanner.stringPut("Enter updated dept: ");
@@ -122,8 +149,6 @@ public class StudentApi {
 
         Gson gson = new Gson();
         String jsonUpdatedStudent = gson.toJson(updatedStudent);
-
-        String updatedStudentUri = "http://localhost:8080/student/update/" + id;
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest updatedStudentrequest = HttpRequest.newBuilder()
@@ -142,8 +167,10 @@ public class StudentApi {
         }
     }
 
-    public void deleteStudent(long id) throws URISyntaxException, IOException, InterruptedException {
-        List<StudentDto> allStudents = getAllStudents2();
+    public void deleteStudent(StudentDto studentDto) throws URISyntaxException, IOException, InterruptedException {
+        long id = studentDto.getId();
+
+        List<StudentDto> allStudents = getAllStudents();
 
         boolean studentExists = allStudents.stream().anyMatch(student -> student.getId() == id);
 
@@ -178,6 +205,40 @@ public class StudentApi {
             }
         } catch (Exception e) {
             System.out.println("Error occurred " + e.getMessage());
+        }
+    }
+
+
+    public void assignCourseToStudent(StudentDto studentDto, CourseDto courseDto) throws URISyntaxException, IOException, InterruptedException {
+        long courseId = courseDto.getId();
+        String courseToStudentUri = "http://localhost:8080/student/{stuId}/course/" + courseId;
+
+        Set<CourseDto> courseSet = null;
+        courseSet = studentDto.getCourses();
+        courseSet.add(courseDto);
+
+        var updatedStudent = new StudentDto();
+        updatedStudent.setId(studentDto.getId());
+        updatedStudent.setAge(studentDto.getAge());
+        updatedStudent.setDept(studentDto.getDept());
+        updatedStudent.setCourses(courseSet);
+
+        Gson gson = new Gson();
+        String jsonUpdatedStudent = gson.toJson(updatedStudent);
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest updatedStudentRequest = HttpRequest.newBuilder()
+                .uri(new URI(courseToStudentUri))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonUpdatedStudent))
+                .build();
+
+        HttpResponse<String> response = client.send(updatedStudentRequest, HttpResponse.BodyHandlers.ofString());
+
+        if(response.statusCode() == 200) {
+            System.out.println("Course added to student");
+        } else {
+            System.out.println("Error adding course to student: " + response.statusCode());
         }
     }
 }

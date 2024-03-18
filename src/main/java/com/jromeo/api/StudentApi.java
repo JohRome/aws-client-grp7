@@ -2,6 +2,7 @@ package com.jromeo.api;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.jromeo.dto.CourseDto;
 import com.jromeo.dto.StudentDto;
 import com.jromeo.utils.InputScanner;
 
@@ -15,6 +16,7 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class StudentApi {
 
@@ -133,6 +135,7 @@ public class StudentApi {
 
     public void updateStudent (StudentDto studentDto) throws IOException, InterruptedException, URISyntaxException {
         long id = studentDto.getId();
+        String updatedStudentUri = "http://localhost:8080/student/update/" + id;
 
         String name = scanner.stringPut("Enter updated student name: ");
         int age = scanner.intPut("Inter updated student age: ");
@@ -146,8 +149,6 @@ public class StudentApi {
 
         Gson gson = new Gson();
         String jsonUpdatedStudent = gson.toJson(updatedStudent);
-
-        String updatedStudentUri = "http://localhost:8080/student/update/" + id;
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest updatedStudentrequest = HttpRequest.newBuilder()
@@ -204,6 +205,40 @@ public class StudentApi {
             }
         } catch (Exception e) {
             System.out.println("Error occurred " + e.getMessage());
+        }
+    }
+
+
+    public void assignCourseToStudent(StudentDto studentDto, CourseDto courseDto) throws URISyntaxException, IOException, InterruptedException {
+        long courseId = courseDto.getId();
+        String courseToStudentUri = "http://localhost:8080/student/{stuId}/course/" + courseId;
+
+        Set<CourseDto> courseSet = null;
+        courseSet = studentDto.getCourses();
+        courseSet.add(courseDto);
+
+        var updatedStudent = new StudentDto();
+        updatedStudent.setId(studentDto.getId());
+        updatedStudent.setAge(studentDto.getAge());
+        updatedStudent.setDept(studentDto.getDept());
+        updatedStudent.setCourses(courseSet);
+
+        Gson gson = new Gson();
+        String jsonUpdatedStudent = gson.toJson(updatedStudent);
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest updatedStudentRequest = HttpRequest.newBuilder()
+                .uri(new URI(courseToStudentUri))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonUpdatedStudent))
+                .build();
+
+        HttpResponse<String> response = client.send(updatedStudentRequest, HttpResponse.BodyHandlers.ofString());
+
+        if(response.statusCode() == 200) {
+            System.out.println("Course added to student");
+        } else {
+            System.out.println("Error adding course to student: " + response.statusCode());
         }
     }
 }

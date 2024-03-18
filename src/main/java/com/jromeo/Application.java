@@ -1,3 +1,5 @@
+package com.jromeo;
+
 import com.jromeo.utils.Menu;
 
 import java.util.Scanner;

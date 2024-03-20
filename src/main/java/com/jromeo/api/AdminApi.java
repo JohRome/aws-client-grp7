@@ -26,7 +26,7 @@ public class AdminApi {
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest post = HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8080/api/v1/auth/authenticate"))
+                .uri(new URI("http://school-mangement.eu-north-1.elasticbeanstalk.com:8080/api/v1/auth/authenticate"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
@@ -44,14 +44,14 @@ public class AdminApi {
         refreshToken = tokenDto.getRefresh_token();
     }
 
-    //  http://localhost:8080/api/v1/auth/userRegister
+    // Use the same URL as in adminLogin method
     public void userRegister(RegisterDto registerDto) throws URISyntaxException, IOException, InterruptedException {
         Gson gson = new Gson();
         String json = gson.toJson(registerDto);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest post = HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8080/api/v1/auth/userRegister"))
+                .uri(new URI("http://school-mangement.eu-north-1.elasticbeanstalk.com:8080/api/v1/auth/userRegister"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
@@ -62,33 +62,13 @@ public class AdminApi {
 
     }
 
-    // http://localhost:8080/api/v1/users/update/{userEmail}
-    public void updateUserByEmail(LoginDto loginDto, String email, RegisterDto updatedUser) throws URISyntaxException, IOException, InterruptedException {
-        adminLogin(loginDto);
-        Gson gson = new Gson();
-        String json = gson.toJson(updatedUser);
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest post = HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8080/api/v1/users/update/" + email))
-                .header("Content-Type", "application/json")
-                .header("Authorization", TOKEN_TYPE + accessToken)
-                .PUT(HttpRequest.BodyPublishers.ofString(json))
-                .build();
-
-        try {
-            HttpResponse<String> response = client.send(post, HttpResponse.BodyHandlers.ofString());
-            System.out.println(response.body());
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
+    // Use the same URL format as in adminLogin method
     public void deleteUserByEmail(LoginDto loginDto, String email) throws URISyntaxException, IOException, InterruptedException {
         adminLogin(loginDto);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest post = HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8080/api/v1/users/delete/" + email))
+                .uri(new URI("http://school-mangement.eu-north-1.elasticbeanstalk.com:8080/api/v1/users/delete/" + email))
                 .header("Authorization", TOKEN_TYPE + accessToken)
                 .DELETE()
                 .build();
@@ -101,6 +81,7 @@ public class AdminApi {
         }
     }
 
+    // Use the same URL format as in adminLogin method
     public void updateToAdminRole(LoginDto loginDto, EmailDto email) throws URISyntaxException, IOException, InterruptedException {
 
         adminLogin(loginDto);
@@ -108,7 +89,7 @@ public class AdminApi {
         String json = gson.toJson(email);
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest post = HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8080/api/v1/users/promoteToAdmin"))
+                .uri(new URI("http://school-mangement.eu-north-1.elasticbeanstalk.com:8080/api/v1/users/promoteToAdmin"))
                 .header("Content-Type", "application/json")
                 .header("Authorization", TOKEN_TYPE + accessToken)
                 .POST(HttpRequest.BodyPublishers.ofString(json))

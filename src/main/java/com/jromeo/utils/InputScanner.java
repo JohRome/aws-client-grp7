@@ -17,7 +17,17 @@ public class InputScanner {
         scanner.nextLine(); // consume the newline character
         return input;
     }
-
+    public static int longPut(String message) {
+        System.out.print(message);
+        while (!scanner.hasNextLong()) {
+            System.out.println("Invalid input. Please enter a valid Long.");
+            System.out.print(message);
+            scanner.next(); // consume the invalid input
+        }
+        int input = scanner.nextInt();
+        scanner.nextLine(); // consume the newline character
+        return input;
+    }
     public static String stringPut(String message) {
         System.out.print(message);
         return scanner.nextLine();

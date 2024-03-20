@@ -16,7 +16,7 @@ import java.util.List;
 
 public class UserApi {
     // Author Jonas Torjman
-    private final String baseUrl = "http://localhost:8080/api/v1";
+    private final String baseUrl = "http://school-mangement.eu-north-1.elasticbeanstalk.com:8080/api/v1";
 
     public void getAllUsers() throws URISyntaxException, IOException, InterruptedException {
         String getUsersUrl = baseUrl + "/users/getUsers";

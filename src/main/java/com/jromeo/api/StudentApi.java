@@ -2,7 +2,6 @@ package com.jromeo.api;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.jromeo.dto.CourseDto;
 import com.jromeo.dto.StudentDto;
 import com.jromeo.utils.InputScanner;
 
@@ -16,14 +15,13 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 public class StudentApi {
 
     InputScanner scanner = new InputScanner();
 
     public void createStudent(StudentDto studentDto) throws IOException, InterruptedException {
-        String newStudentUri = "http://localhost:8080/student/save";
+        String newStudentUri = "http://school-mangement.eu-north-1.elasticbeanstalk.com:8080/student/save";
 
         var student = new StudentDto();
         student.setName(studentDto.getName());
@@ -166,26 +164,22 @@ public class StudentApi {
             System.out.println("Error updating student. Status: " + response.statusCode());
         }
     }
-
-    public void deleteStudent(StudentDto studentDto) throws URISyntaxException, IOException, InterruptedException {
-        long id = studentDto.getId();
-
-        List<StudentDto> allStudents = getAllStudents();
-
-        boolean studentExists = allStudents.stream().anyMatch(student -> student.getId() == id);
-
-        if(!studentExists) {
-            System.out.println("Student does not exist");
-            System.out.flush();
-            return;
-        }
-
-        String deleteStudentUri = "http://localhost:8080/student/delete/" + id;
-
-//        if(authToken == null || authToken.isEmpty()) {
+    //        if(authToken == null || authToken.isEmpty()) {
 //            System.out.println("Please log in first");
 //            return;
 //        }
+    public void deleteStudent(long studentId) throws URISyntaxException, IOException, InterruptedException {
+        // Construct the URI for deleting the student
+        String deleteStudentUri = "http://localhost:8080/student/delete/" + studentId;
+
+        // Check if the student exists
+        List<StudentDto> allStudents = getAllStudents(); // Assuming this method retrieves all students
+        boolean studentExists = allStudents.stream().anyMatch(student -> student.getId() == studentId);
+
+        if (!studentExists) {
+            System.out.println("Student does not exist");
+            return;
+        }
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest deleteStudentRequest = HttpRequest.newBuilder()
@@ -199,46 +193,35 @@ public class StudentApi {
             HttpResponse<String> response = client.send(deleteStudentRequest, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                System.out.println("Student deleted");
+                System.out.println("Student deleted successfully");
             } else {
                 System.out.println("Error deleting student. Status: " + response.statusCode());
             }
         } catch (Exception e) {
-            System.out.println("Error occurred " + e.getMessage());
+            System.out.println("Error occurred: " + e.getMessage());
         }
     }
 
 
-    public void assignCourseToStudent(StudentDto studentDto, CourseDto courseDto) throws URISyntaxException, IOException, InterruptedException {
-        long courseId = courseDto.getId();
-        String courseToStudentUri = "http://localhost:8080/student/{stuId}/course/" + courseId;
-
-        Set<CourseDto> courseSet = null;
-        courseSet = studentDto.getCourses();
-        courseSet.add(courseDto);
-
-        var updatedStudent = new StudentDto();
-        updatedStudent.setId(studentDto.getId());
-        updatedStudent.setAge(studentDto.getAge());
-        updatedStudent.setDept(studentDto.getDept());
-        updatedStudent.setCourses(courseSet);
-
-        Gson gson = new Gson();
-        String jsonUpdatedStudent = gson.toJson(updatedStudent);
+    public void assignCourseToStudent(long studentId, long courseId, String department) throws URISyntaxException, IOException, InterruptedException {
+        String courseToStudentUri = "http://localhost:8080/student/" + studentId + "/course/" + courseId;
 
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest updatedStudentRequest = HttpRequest.newBuilder()
+        HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI(courseToStudentUri))
                 .header("Content-Type", "application/json")
-                .PUT(HttpRequest.BodyPublishers.ofString(jsonUpdatedStudent))
+                .PUT(HttpRequest.BodyPublishers.noBody())
                 .build();
 
-        HttpResponse<String> response = client.send(updatedStudentRequest, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        if(response.statusCode() == 200) {
+        if (response.statusCode() == 200) {
             System.out.println("Course added to student");
         } else {
             System.out.println("Error adding course to student: " + response.statusCode());
         }
     }
+
+
+
 }
